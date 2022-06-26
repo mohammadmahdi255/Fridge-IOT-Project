@@ -3,12 +3,20 @@ SettingUnit::SettingUnit(){}
 
 void SettingUnit::save(){}
 
-void SettingUnit::load(){}
-
 void SettingUnit::setTemperature(float temperature)
 {
       this->temperature = temperature;
       save();
+}
+
+void SettingUnit::incTemperature()
+{
+      temperature++;
+}
+
+void SettingUnit::decTemperature()
+{
+      temperature--;
 }
 
 void SettingUnit::SuperCoolingSwitch()
@@ -16,6 +24,8 @@ void SettingUnit::SuperCoolingSwitch()
       superCooling = !superCooling;
       save();
 }
+
+void SettingUnit::load(){}
 
 float SettingUnit::getTemperature()
 {

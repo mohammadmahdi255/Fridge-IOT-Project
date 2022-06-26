@@ -2,6 +2,7 @@
 #define SENSOR_UNIT_H
 #include "Arduino.h"
 
+#define NO_INPUT -1
 #define POWER  0
 #define MUTE   1
 #define UP     2
