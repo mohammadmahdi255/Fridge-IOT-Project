@@ -1,21 +1,30 @@
+#ifndef CONTROL_UNIT_H
+#define CONTROL_UNIT_H
+#include <SegmentDisplay.h>
 #include <Relay.h>
+#include "Sensors.h"
+#include "Setting.h"
 
-#define TURNOFF  -1
-#define INITUP  0
-#define COOLING  1
-#define WAITING 2
+#define TURNOFF       -1
+#define INITUP            0
+#define COOLING       1
+#define WAITING        2
 
-class ControlUnit
+class ControlUnit : public SensorUnit, SettingUnit
 {
       private:
-            int lastState;
+            int currentState = TURNOFF;
             Relay compressor;
             Relay lamp;
             Relay fan;
             Relay ionizer;
+            Relay buzzer;
+            void updateSystem(int nextState);
       public:
-            ControlUnit(int pin_compressor, int pin_lamp, int pin_fan, int pin_ionizer, bool isNormallyOpen);
-            void begin();
-            void update(int nextState);
-            void getState();
+            SegmentDisplay sev[2];
+            ControlUnit();
+            ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIonizer, int pinBuzzer, bool isNormallyOpen, int pinKey, int pinLm35, int pinDoor, const int pinSev[]);
+            int getState();
+            void process();
 };
+#endif
