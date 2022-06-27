@@ -29,7 +29,7 @@ void SettingUnit::load(){}
 
 float SettingUnit::getTemperature()
 {
-      return temperature - 3.0 ? temperature > 7.0 : temperature;
+      return temperature > 7.0 && superCooling ?  temperature - 3.0 : temperature;
 }
 
 bool SettingUnit::isSuperCooling()

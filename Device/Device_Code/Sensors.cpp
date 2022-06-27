@@ -1,14 +1,17 @@
 #include "Sensors.h"
 #include "math.h"
 
-SensorUnit::SensorUnit(){}
+SensorUnit::SensorUnit()
+{
+      timer = TimerUnit();
+}
 
 SensorUnit::SensorUnit(int pinLm35, int pinDoor, int pinKey)
 {
     this->pinLm35 = pinLm35;
     this->pinDoor = pinDoor;
     this->pinKey = pinKey;
-    
+    timer = TimerUnit();
 }
 
 void SensorUnit::begin()
@@ -39,14 +42,14 @@ int SensorUnit::readKey()
             int reading = calculateKey();
             
             if(reading != lastButtonState)
-                  lastDebounceTime = millis();
+                  timer.set(DEBOUNCE_TIMER);
             
-            if ((millis() - lastDebounceTime) > debounceDelay[reading+1]) {
+            if (timer.getDelay(DEBOUNCE_TIMER) > debounceDelay[reading+1]) {
                   if (reading != buttonState) {
                         buttonState = reading;
                         return buttonState;
                   } else {
-                        return -1;
+                        return NO_INPUT;
                   }
             }
             
@@ -73,5 +76,5 @@ int SensorUnit::calculateKey()
             return pushbuttonsCount - i;
       }
       
-      return -1;
+      return NO_INPUT;
 }

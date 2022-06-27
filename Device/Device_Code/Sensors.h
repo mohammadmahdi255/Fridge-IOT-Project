@@ -1,6 +1,6 @@
 #ifndef SENSOR_UNIT_H
 #define SENSOR_UNIT_H
-#include "Arduino.h"
+#include "TimerUnit.h"
 
 #define NO_INPUT -1
 #define POWER  0
@@ -22,7 +22,7 @@ class SensorUnit
             unsigned long debounceDelay[6] = {50, 500, 50, 50, 50, 500};
             int buttonState = -1;
             int lastButtonState = -1;
-            unsigned long lastDebounceTime = 0;
+
             int pushbuttonsCount = 5;
             float sourceVoltage = 5.0f;
             float resitorValue = 1000.0f;
@@ -31,6 +31,7 @@ class SensorUnit
 
             int calculateKey();
       protected:
+            TimerUnit timer;
             void begin();
             void update();
       public:

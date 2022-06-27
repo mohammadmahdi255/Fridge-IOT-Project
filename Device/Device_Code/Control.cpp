@@ -16,38 +16,80 @@ ControlUnit::ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIoni
 
 void ControlUnit::updateSystem(int nextState)
 {
-      if(nextState == HOLDING)
+      if(nextState < EMERGENCY || nextState > SUSPEND)
             return;
-            
-      if(nextState == TURNOFF || nextState == EMERGENCY) {
-            compressor.change(false);
-            lamp.change(false);
-            fan.change(false);
-            ionizer.change(false);
-            buzzer.change(sound);
-            timerStart = millis();
-      } else if(nextState == INITUP) {
+
+      Serial.println(nextState);
+      currentState = nextState;
+
+      if(nextState == INIT) {
             compressor.begin();
             lamp.begin();
             fan.begin();
             ionizer.begin();
             buzzer.begin();
-      } else if(nextState == COOLING || nextState == WAITING) {
-            compressor.change(nextState == COOLING);
-            lamp.change(nextState == WAITING);
-            fan.change(nextState == COOLING);
-            ionizer.change(nextState == COOLING);
-            timerStart = millis();
-      } else if(nextState == WARNING || nextState == CRITICAL) {
+            sev[1].turnOn();
+            sev[0].turnOn();
+            return;
+      }
+            
+      if(nextState == OFF) {
+            compressor.turnOff();
+            lamp.turnOff();
+            fan.turnOff();
+            ionizer.turnOff();
+
+            sev[1].turnOff();
+            sev[0].turnOff();
+            return;
+      }
+
+      if(nextState == EMERGENCY) {
+            compressor.turnOff();
+            lamp.turnOff();
+            fan.turnOff();
+            ionizer.turnOff();
+            buzzer.turnOn();
+            return;
+      }
+
+      timer.set(STATE_TIMER);
+
+      if(nextState == SUSPEND) {
+            compressor.turnOff();
+            lamp.turnOff();
+            fan.turnOn();
+            ionizer.turnOn();
+            return;
+      }
+
+      if(nextState == COOLING) {
+            compressor.turnOn();
+            lamp.turnOff();
+            fan.turnOn();
+            ionizer.turnOn();
+            return;
+      }
+
+      timer.set(DOOR_TIMER);
+
+      if(nextState == DOOR_OPEN) {
+            compressor.turnOff();
+            lamp.turnOn();
+            fan.turnOff();
+            ionizer.turnOff();
+            buzzer.change(sound);
+            return;
+      }
+
+      if(nextState == FETAL_ERROR) {
             compressor.change(isDoorClose());
             lamp.change(!isDoorClose());
             fan.change(isDoorClose());
             ionizer.change(isDoorClose());
             buzzer.change(sound);
-            timerStart = millis();
-      } 
-
-      currentState = nextState;
+            return;
+      }
 
 }
 
@@ -64,16 +106,18 @@ void ControlUnit::process()
       switch (reading)
       {
       case MUTE:
-            buzzer.change(!canMuted);
-            sound = !canMuted;
+            buzzer.turnOff();
+            sound = false;
             break;
       
       case UP:
             incTemperature();
+            state[UPDATE_TEMP] = true;
             break;
       
       case DOWN:
             decTemperature();
+            state[UPDATE_TEMP] = true;
             break;
 
       case SUPER:
@@ -83,209 +127,209 @@ void ControlUnit::process()
 
       updateSystem(nextState(reading));
 
-      if(millis() - segTimer > SEGTIME) {
-            showError = (showError + 1) % 4;
-            segTimer = millis();
+      if(timer.getDelay(SEV_SEG_TIMER) > segTime[int(show)] && show) {
+            do {
+                  showState = (showState + 1) % 3;
+            } while (!state[showState]);
+            timer.set(SEV_SEG_TIMER);
       }
 
-      if(showError == 0) {
-            switch (currentState) {
-                  case TURNOFF:
-                        sev[1].turnOff();
-                        sev[0].turnOff();
-                        break;
-                  default:
-                        displayTemp();
-                        break;
+      if(show && currentState != OFF) {
+            sev[1].turnOn();
+            sev[0].turnOn(); 
+            if(showState == UPDATE_TEMP) {
+                  displayTemp(getTemperature());
+                  state[UPDATE_TEMP] = false;
+                  show = false;
+            } else if(showState == ERROR_DISPLAY) {
+                  switch (currentState) {
+                        case FETAL_ERROR:
+                              sev[1].displayHex(15, false);
+                              sev[0].displayHex(14, false); 
+                              break;
+                        case EMERGENCY:
+                              sev[1].displayHex(14, false);
+                              sev[0].displayHex(14, false); 
+                              break;
+                  }
+                  state[ERROR_DISPLAY] = false;
+                  show = false;
+            } else {
+                  displayTemp(getCurrentTemperature());
             }
-      } else if(showError == 2) {
-           switch (currentState) {
-                  case TURNOFF:
-                        sev[1].turnOff();
-                        sev[0].turnOff();
-                        break;
-                  case WARNING:
-                        sev[1].displayHex(10, false);
-                        sev[0].displayHex(17, false);
-                        break;
-                  case CRITICAL:
-                        sev[1].displayHex(12, false);
-                        sev[0].displayHex(17, false);
-                        break;
-                  case EMERGENCY:
-                        sev[1].displayHex(15, false);
-                        sev[0].displayHex(14, false);
-                        break;
-                  default:
-                        displayTemp();
-                        break;
-            }
-      }  else {
-            switch (currentState) {
-                  case TURNOFF:
-                  case WARNING:
-                  case CRITICAL:
-                  case EMERGENCY:
-                        sev[1].turnOff();
-                        sev[0].turnOff();
-                        break;
-                  default:
-                        displayTemp();
-                        break;
-            }
-      } 
+
+      } else {
+            sev[1].turnOff();
+            sev[0].turnOff(); 
+            show = true;    
+      }  
       
 }
 
 int ControlUnit::nextState(int reading)
 {
+      if(reading == POWER) 
+            return currentState == OFF; // true = 1 = INIT, false = 0 = OFF
+
       switch (currentState)
       {
-      case TURNOFF:
-            if(reading == POWER) 
-                  return INITUP;
-            break;
 
-      case INITUP:
-            if(reading == POWER) {
-                  sound = false;
-                  return TURNOFF;
-            }
+      case INIT:
+            lastStateTemp = getCurrentTemperature();
 
-            if(getCurrentTemperature() > getTemperature() + tolerance && isDoorClose()) 
+            /* 
+                  conditon check is done
+            */
+            if(lastStateTemp - getTemperature() - tolerance > 0.000001f && isDoorClose()) 
                   return COOLING;
 
-            if(getCurrentTemperature() > criticalTemp) {
-                  sound = true;
-                  return CRITICAL;
-            }
-
-            if(getCurrentTemperature() > warningTemp) {
-                  sound = true;
-                  return WARNING;
-            }
-
-            return WAITING;
+            /* sensor init code */
+            shouldRest = false;
+            return SUSPEND;
 
       case COOLING:
-            if(reading == POWER) {
+            lastStateTemp = fmax(lastStateTemp, getCurrentTemperature());
+
+            /* 
+                  conditon check is done
+            */
+            if(getCurrentTemperature() - lastStateTemp > 0.000001f  && timer.getDelay(STATE_TIMER) > WORKTIME) {
+                  shouldRest = false;
+                  sound = true;
+                  lastStateTemp = getCurrentTemperature();
+                  return FETAL_ERROR;
+            }
+
+            /*
+                  conditon check is done
+            */
+            if(!isDoorClose()) {
+                  shouldRest = false;
                   sound = false;
-                  return TURNOFF;
+                  return DOOR_OPEN;
             }
 
-            if(getCurrentTemperature() > criticalTemp && (millis() - timerStart > workTime || !isDoorClose())) {
-                  sound = true;
-                  return CRITICAL;
+            /*
+                  conditon check is done
+            */
+            if(getTemperature() >= getCurrentTemperature() || timer.getDelay(STATE_TIMER) > WORKTIME) {
+                  shouldRest = true;
+                  return SUSPEND;
             }
 
-            if(getCurrentTemperature() > warningTemp && (millis() - timerStart > workTime || !isDoorClose())) {
-                  sound = true;
-                  return WARNING;
-            }
-
-            if(getCurrentTemperature() <= getTemperature() || !isDoorClose() || millis() - timerStart > workTime)
-                  return WAITING;
             break;
 
-      case WAITING:
-            if(reading == POWER) {
-                  sound = false;
-                  return TURNOFF;
-            }
-            
-            if(!isDoorClose() && millis() - timerStart > openDoor) {
+      case DOOR_OPEN:
+            /*
+                  conditon check is done
+            */
+            if(getCurrentTemperature() - warningTemp > 0.000001f) {
                   sound = true;
-                  return WARNING;
-            }     
+                  return FETAL_ERROR;
+            }
 
-            if(getCurrentTemperature() > getTemperature() + tolerance && isDoorClose() && millis() - timerStart > restTime) 
+            /*
+                  conditon check is done
+            */
+            if(isDoorClose())
+                  return shouldRest ? SUSPEND : COOLING;
+            
+            /*
+                  conditon check is done
+            */
+            if(timer.getDelay(DOOR_TIMER) > OPENDOOR) {
+                  sound = true;
+                  return DOOR_OPEN;
+            }
+                  
+            break;
+
+      case SUSPEND:
+            /*
+                  conditon check is done
+            */
+            if(!isDoorClose()) 
+                  return DOOR_OPEN;
+
+            /*
+                  conditon check is done
+            */
+            if(warningTemp <= getCurrentTemperature()) 
+                  return COOLING;
+
+            /*
+                  conditon check is done
+            */
+            if(getCurrentTemperature() - getTemperature() - tolerance > 0.000001f && timer.getDelay(STATE_TIMER) > RESTTIME) 
                   return COOLING;
 
             break;
 
-      case WARNING:
-            if(reading == POWER) {
-                  sound = false;
-                  return TURNOFF;
-            }
-            
-            if(isDoorClose() && !compressor.getState()) {
-                  canMuted = true;
-                  sound = false;
-                  return WARNING;
-            }
+      case FETAL_ERROR:
+            state[ERROR_DISPLAY] = true;
+            lastStateTemp = fmax(lastStateTemp, getCurrentTemperature());
 
-            if(getCurrentTemperature() > warningTemp && !isDoorClose() && millis() - timerStart > openDoor) {
-                  canMuted = true;
+            /*
+                  conditon check is done
+            */
+            if(!isDoorClose() && timer.getDelay(DOOR_TIMER) * 2 > OPENDOOR) {
                   sound = true;
-                  return CRITICAL;
+                  lastStateTemp = getCurrentTemperature();
+                  return FETAL_ERROR;
             }
 
-            if(getCurrentTemperature() > warningTemp && isDoorClose() && millis() - timerStart > longWorkTime) {
-                  canMuted = true;
-                  sound = true;
-                  return CRITICAL;
+            /*
+                  conditon check is done
+            */
+            if(isDoorClose() ^ compressor.getState()) {
+                  sound = false;
+                  lastStateTemp = getCurrentTemperature();
+                  return FETAL_ERROR;
             }
 
+            /*
+                  conditon check is done
+            */
             if(getCurrentTemperature() < warningTemp) {
-                  canMuted = true;
                   sound = false;
-                  return COOLING;
+                  return isDoorClose() ? COOLING : DOOR_OPEN;
             }
 
-            break;
-      
-      case CRITICAL:
-            if(reading == POWER) {
-                  canMuted = true;
+            /*
+                  conditon check is done
+            */
+            if(timer.getDelay(STATE_TIMER) < LONGWORKTIME)
+                  return HOLDING;
+
+            /*
+                  conditon check is done
+            */
+            if(getCurrentTemperature() - lastStateTemp < 0.000001f) {
                   sound = false;
-                  return TURNOFF;
-            }
-            
-            if(isDoorClose() && !compressor.getState()) {
-                  canMuted = true;
-                  sound = false;
-                  return CRITICAL;
+                  lastStateTemp = getCurrentTemperature();
+                  return FETAL_ERROR;
             }
 
-            if(getCurrentTemperature() > criticalTemp && !isDoorClose()) {
-                  canMuted = false;
-                  sound = true;
-                  return CRITICAL;
-            }
-
-            if(getCurrentTemperature() > criticalTemp && isDoorClose() && millis() - timerStart > longWorkTime) {
-                  canMuted = false;
+            /*
+                  conditon check is done
+            */
+            if(timer.getDelay(STATE_TIMER) > LONGWORKTIME) {
                   sound = true;
                   return EMERGENCY;
             }
 
-            if(getCurrentTemperature() < criticalTemp) {
-                  canMuted = true;
-                  sound = false;
-                  return WARNING;
-            }
-
             break;
-      
+
       case EMERGENCY:
-            if(reading == POWER) {
-                  canMuted = true;
-                  sound = false;
-                  return TURNOFF;
-            }
-            
-            if(isDoorClose())
-                  return CRITICAL;
-            if(millis() - timerStart > timeOut)
-                  return TURNOFF;
+            state[ERROR_DISPLAY] = true;
+            break;
+
       }
       return HOLDING;
 }
 
-void ControlUnit::displayTemp()
+void ControlUnit::displayTemp(float temp)
 {
-      float temp = getCurrentTemperature();
       if(temp < -9 || temp > 99)
             return;
 
@@ -302,5 +346,4 @@ void ControlUnit::displayTemp()
             sev[1].displayHex(round(temp) / 10, false);
             sev[0].displayHex(round(temp) % 10, false);
       }
-      
 }
