@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 <WORKSPACE>
  <FRAME activewindow="0">
-  <PLACEMENT>2c00000000000000010000000083ffff0083ffffffffffffffffffff29000000660000004906000046040000</PLACEMENT>
+  <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff930000002f000000b30600000f040000</PLACEMENT>
   <WINDOW type="default" module="ISIS">
-   <editor metric="0" gridmajor="25400000" mode="00000000" zoom="-1" scale="55" flipped="0" gridminor="508000" gridmode="32" snapidx="1" snap="127000" xcursor="0" orgmode="0" snaprange="230909">
+   <editor metric="0" gridmajor="25400000" mode="00000001" zoom="0" scale="48" flipped="0" gridminor="508000" gridmode="32" snapidx="1" snap="127000" xcursor="0" orgmode="0" snaprange="264583">
     <world y1="-8890000" x1="-12700000" y2="8890000" x2="12700000"/>
-    <centre x="7493000" y="6731000"/>
+    <centre x="4191000" y="-11938000"/>
     <origin x="0" y="0"/>
    </editor>
   </WINDOW>
@@ -18,9 +18,9 @@
   </editor>
  </MODULE>
  <MODULE name="ISIS">
-  <editor metric="0" gridmajor="25400000" mode="00000000" zoom="-1" scale="55" flipped="0" gridminor="508000" gridmode="32" snapidx="1" snap="127000" xcursor="0" orgmode="0" snaprange="230909">
+  <editor metric="0" gridmajor="25400000" mode="00000001" zoom="0" scale="48" flipped="0" gridminor="508000" gridmode="32" snapidx="1" snap="127000" xcursor="0" orgmode="0" snaprange="264583">
    <world y1="-8890000" x1="-12700000" y2="8890000" x2="12700000"/>
-   <centre x="7493000" y="6731000"/>
+   <centre x="4191000" y="-11938000"/>
    <origin x="0" y="0"/>
   </editor>
  </MODULE>
@@ -115,7 +115,7 @@
      <ITEM name="TopLineAddress">00000020</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="450" x="1269" flags="00008023" y="121" h="250" pid="0" iid="64">
+   <POPUP w="450" x="215" flags="00008023" y="157" h="250" pid="0" iid="64">
     <PROPERTIES>
      <ITEM name="AutoEcho">0</ITEM>
      <ITEM name="HexMode">0</ITEM>
