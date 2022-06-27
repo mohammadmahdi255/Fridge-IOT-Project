@@ -8,6 +8,7 @@ SensorUnit::SensorUnit(int pinLm35, int pinDoor, int pinKey)
     this->pinLm35 = pinLm35;
     this->pinDoor = pinDoor;
     this->pinKey = pinKey;
+    
 }
 
 void SensorUnit::begin()
@@ -17,8 +18,8 @@ void SensorUnit::begin()
 
 void SensorUnit::update()
 {
-    DoorOpen = digitalRead(pinDoor);
-    currentTemperature = map(analogRead(pinLm35), 0, 325, 0, 40);
+    doorClose = digitalRead(pinDoor);
+    currentTemperature = 40.0f * analogRead(pinLm35) / 325;
 }
 
 float SensorUnit::getCurrentTemperature()
@@ -26,9 +27,9 @@ float SensorUnit::getCurrentTemperature()
     return currentTemperature;
 }
 
-bool SensorUnit::isDoorOpen()
+bool SensorUnit::isDoorClose()
 {
-    return DoorOpen;
+    return doorClose;
 }
 
 int SensorUnit::readKey()

@@ -8,7 +8,7 @@
 */
 #define KEY_READ                A0
 #define PIN_LM35                A1
-#define PIN_DOOR                43
+#define PIN_DOOR              43
 
 /* 
  *  Output Relays Pins
@@ -22,9 +22,11 @@
 /* 
  *  Seven segment OutPut
 */
+#define PIN_SEV0  44
+#define PIN_SEV1  45
 const int sev[] = {26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41};
    
-ControlUnit centerUnit(PIN_COMPRESSOR, PIN_LAMP, PIN_FAN, PIN_IONIZER, PIN_BUZZER, true, KEY_READ, PIN_LM35, PIN_DOOR, sev);
+ControlUnit centerUnit(PIN_COMPRESSOR, PIN_LAMP, PIN_FAN, PIN_IONIZER, PIN_BUZZER, true, KEY_READ, PIN_LM35, PIN_DOOR, sev, PIN_SEV0, PIN_SEV1);
 
 
 #endif

@@ -24,15 +24,18 @@ class ControlUnit : public SensorUnit, SettingUnit
             Relay ionizer;
             Relay buzzer;
             unsigned long timerStart = 0;
+            unsigned long segTimer = 0;
+            int showError = 0;
             bool canMuted = true;
-            bool isMuted = false;
+            bool sound = false;
             void updateSystem(int nextState);
             int nextState(int reading);
-      public:
             SegmentDisplay sev[2];
+      public:
             ControlUnit();
-            ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIonizer, int pinBuzzer, bool isNormallyOpen, int pinKey, int pinLm35, int pinDoor, const int pinSev[]);
+            ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIonizer, int pinBuzzer, bool isNormallyOpen, int pinKey, int pinLm35, int pinDoor, const int pinSev[], int pinSev0, int pinSev1);
             int getState();
             void process();
+            void displayTemp();
 };
 #endif

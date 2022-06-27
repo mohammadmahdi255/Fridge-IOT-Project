@@ -4,6 +4,8 @@
 #define WORKTIME 1800000 // 30 min
 #define RESTTIME 600000 // 10 min
 #define OPENDOOR 30000 // 30 sec
+#define TIMEOUT  60000 // 60 sec
+#define SEGTIME   500
 
 class SettingUnit
 {
@@ -17,6 +19,7 @@ class SettingUnit
             unsigned long workTime = WORKTIME;
             unsigned long restTime = RESTTIME;
             unsigned long openDoor = OPENDOOR;
+            unsigned long timeOut = TIMEOUT;
             float warningTemp = 16.0f;
             float criticalTemp = 20.0f;
             void setTemperature(float temperature);

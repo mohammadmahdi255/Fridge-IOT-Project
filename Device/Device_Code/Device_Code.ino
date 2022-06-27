@@ -7,6 +7,5 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  centerUnit.sev[1].displayHex(-1);
   centerUnit.process();
 }

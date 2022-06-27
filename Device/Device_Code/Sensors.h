@@ -16,7 +16,7 @@ class SensorUnit
             int pinDoor;
             int pinKey;
             float currentTemperature;
-            bool DoorOpen;
+            bool doorClose;
 
             // pre initialize
             unsigned long debounceDelay[6] = {50, 500, 50, 50, 50, 500};
@@ -37,7 +37,7 @@ class SensorUnit
             SensorUnit();
             SensorUnit(int pinLm35, int pinDoor, int pinKey);
             float getCurrentTemperature();
-            bool isDoorOpen();
+            bool isDoorClose();
             int readKey();
 };
 
