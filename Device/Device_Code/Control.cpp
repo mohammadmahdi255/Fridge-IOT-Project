@@ -103,27 +103,28 @@ void ControlUnit::process()
       update();
       int reading = readKey();
       
-      switch (reading)
-      {
-      case MUTE:
-            buzzer.turnOff();
-            sound = false;
-            break;
-      
-      case UP:
-            incTemperature();
-            state[UPDATE_TEMP] = true;
-            break;
-      
-      case DOWN:
-            decTemperature();
-            state[UPDATE_TEMP] = true;
-            break;
+      if(currentState != OFF)
+            switch (reading)
+            {
+            case MUTE:
+                  buzzer.turnOff();
+                  sound = false;
+                  break;
+            
+            case UP:
+                  incTemperature();
+                  state[UPDATE_TEMP] = true;
+                  break;
+            
+            case DOWN:
+                  decTemperature();
+                  state[UPDATE_TEMP] = true;
+                  break;
 
-      case SUPER:
-            SuperCoolingSwitch();
-            break;
-      }
+            case SUPER:
+                  SuperCoolingSwitch();
+                  break;
+            }
 
       updateSystem(nextState(reading));
 

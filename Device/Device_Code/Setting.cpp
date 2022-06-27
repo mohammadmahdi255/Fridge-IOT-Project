@@ -11,17 +11,20 @@ void SettingUnit::setTemperature(float temperature)
 
 void SettingUnit::incTemperature()
 {
-      temperature++;
+      if(temperature < 14.0f)
+            temperature++;
 }
 
 void SettingUnit::decTemperature()
 {
-      temperature--;
+      if(temperature > 4.0f)
+            temperature--;
 }
 
 void SettingUnit::SuperCoolingSwitch()
 {
       superCooling = !superCooling;
+      Serial.println("Super Cooling: " + String(superCooling));
       save();
 }
 
@@ -29,7 +32,7 @@ void SettingUnit::load(){}
 
 float SettingUnit::getTemperature()
 {
-      return temperature > 7.0 && superCooling ?  temperature - 3.0 : temperature;
+      return fmin(fmax(4.0f, superCooling ?  temperature - 3.0f : temperature), 14.0f);
 }
 
 bool SettingUnit::isSuperCooling()

@@ -1,11 +1,12 @@
 #ifndef SETTING_UNIT_H
 #define SETTING_UNIT_H
+#include "Arduino.h"
 
 #define LONGWORKTIME 15000
 #define WORKTIME 10000 // 30 min
 #define RESTTIME 10000 // 10 min
 #define OPENDOOR 10000 // 30 sec
-const unsigned int segTime[] =  {1500, 500};
+const unsigned int segTime[] =  {2000, 300};
 
 class SettingUnit
 {
