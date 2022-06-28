@@ -1,2 +1,5 @@
 *.hex
 */Project Backups
+*.workspace
+venv
+*.db
