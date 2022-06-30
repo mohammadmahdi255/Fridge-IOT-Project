@@ -39,7 +39,9 @@ void recvData(int address, char data[], int size) {
       Wire.requestFrom(address, size); 
       for(int i = 0; Wire.available(); i++){
             data[i] = Wire.read();
-            Serial.print(data[i]);
+            Serial.print((int)data[i]);
+            Serial.print("-");
       }
       Serial.println();
+      delay(70);
 }
