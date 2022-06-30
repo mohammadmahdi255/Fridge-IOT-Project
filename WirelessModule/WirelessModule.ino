@@ -31,12 +31,13 @@ void setup() {
 void loop(){
   WiFiClient client = server.available();   // Listen for incoming clients
 
-      char data[3][24] = {"", "", ""};
-      recvData(SLAVE_ADDRESS, data[0], 24);
-      recvData(SLAVE_ADDRESS, data[1], 24);
-      recvData(SLAVE_ADDRESS, data[2], 24);
+      byte data[12];
+      recvData(SLAVE_ADDRESS, &data[0], 12);
+      float currentTemp = *((float *)&data[0]);
+      float requstTemp = *((float *)&data[4]);
+      int currentState = *((int *)&data[8]);
       char buff [512];
-      sprintf(buff, "'{%s:\"%s\",%s:\"%s\",%s:\"%s\"}'", "Current Temperature", data[0], "Request Temp", data[1], "Current Status", data[2]);
+      sprintf(buff, "'{%s:\"%f\",%s:\"%f\",%s:\"%s\"}'", "Current_Temperature", currentTemp, "Request_Temp", requstTemp, "Current_Status", getStatus(currentState));
       Serial.println(buff);
       delay(2000);
 
@@ -69,12 +70,14 @@ void loop(){
                                           sendData(SLAVE_ADDRESS, "0"); // power on/off is 0
                                           client.println("'{\"message\": \"successfull\"}'");
                                     } else if(header.indexOf("GET /info/") >= 0) {
-                                          char data[3][16];
-                                          recvData(SLAVE_ADDRESS, data[0], 16);
-                                          recvData(SLAVE_ADDRESS, data[1], 16);
-                                          recvData(SLAVE_ADDRESS, data[2], 16);
+                                          byte data[12];
                                           char buff [512];
-                                          sprintf(buff, "'{%s:\"%s\",%s:\"%s\",%s:\"%s\"}'", "Current Temperature", data[0], "Request Temp", data[1], "Current Status", data[2]);
+                                          recvData(SLAVE_ADDRESS, &data[0], 12);
+                                          float currentTemp = *((float *)&data[0]);
+                                          float requstTemp = *((float *)&data[4]);
+                                          int currentState = *((int *)&data[8]);
+                                          sprintf(buff, "'{%s:\"%f\",%s:\"%f\",%s:\"%d\"}'", "Current_Temperature", currentTemp, "Request_Temp", requstTemp, "Current_Status", getStatus(currentState));
+                                          Serial.println(buff);
                                           client.println(buff);
                                     }
                                     break;

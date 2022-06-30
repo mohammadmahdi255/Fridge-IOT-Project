@@ -35,7 +35,7 @@ void sendData(int address, String data) {
       Wire.endTransmission();
 }
 
-void recvData(int address, char data[], int size) {
+void recvData(int address, byte data[], int size) {
       Wire.requestFrom(address, size); 
       for(int i = 0; Wire.available(); i++){
             data[i] = Wire.read();
@@ -44,4 +44,25 @@ void recvData(int address, char data[], int size) {
       }
       Serial.println();
       delay(70);
+}
+
+String getStatus(int currentStatus) {
+      switch(currentStatus) {
+            case -2:
+                  return "Emergency";
+            case -1:
+                  return "Fetal Error";
+            case 0:
+                  return "Off";
+            case 1:
+                  return "Init Up";
+            case 2:
+                  return "Cooling";
+            case 3:
+                  return "Door is Open";
+            case 4:
+                  return "Sleep";
+            default:
+                  return "Not found";
+      }
 }
