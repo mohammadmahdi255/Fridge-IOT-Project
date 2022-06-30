@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import json
+import requests
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from json import dumps
@@ -14,6 +15,8 @@ api = Api(app)
 db = SQLAlchemy(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+url = "http://192.168.23.50:8080"
+
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -69,42 +72,58 @@ class Actions(Resource):
     def post(self):
         action_type = request.json['type']
         if action_type == 1:
-            # Increase temp
-            # Send Request to end point
-            #     url = 'http://exemple.com'
-            # headers = {'Content-type': 'text/html; charset=UTF-8'}
-            # response = requests.post(url, data=data, headers=headers)
-            object = Action(assignee='IOT-Manager', action='Increase Temprature', status='Done')
-            db.session.add(object)
-            db.session.commit()
+            response = requests.request("GET", url + '/1/', headers={}, data={})            
+            data = response.json()
+            if data.message == "successfull":
+                object = Action(assignee='IOT-Manager', action='Increase Temprature', status='Done')
+                db.session.add(object)
+                db.session.commit()
         elif action_type == 2:
             # Decrease temp
-            object = Action(assignee='IOT-Manager', action='Decrease Temprature', status='Done')
-            db.session.add(object)
-            db.session.commit()
-            pass
+            response = requests.request("GET", url + '/2/', headers={}, data={})            
+            data = response.json()
+            if data.message == "successfull":
+                object = Action(assignee='IOT-Manager', action='Decrease Temprature', status='Done')
+                db.session.add(object)
+                db.session.commit()
         elif action_type == 3:
             # Mute
-            object = Action(assignee='IOT-Manager', action='Mute', status='Done')
-            db.session.add(object)
-            db.session.commit()
+            response = requests.request("GET", url + '/3/', headers={}, data={})            
+            data = response.json()
+            if data.message == "successfull":
+                object = Action(assignee='IOT-Manager', action='Mute', status='Done')
+                db.session.add(object)
+                db.session.commit()
         elif action_type == 4:
             # Super cooling
-            object = Action(assignee='IOT-Manager', action='Super cooling', status='Done')
-            db.session.add(object)
-            db.session.commit()
+            response = requests.request("GET", url + '/4/', headers={}, data={})            
+            data = response.json()
+            if data.message == "successfull":
+                object = Action(assignee='IOT-Manager', action='Super cooling', status='Done')
+                db.session.add(object)
+                db.session.commit()
         elif action_type == 5:
+            response = requests.request("GET", url + '/5/', headers={}, data={})            
+            data = response.json()
+            if data.message == "successfull":
             # Power off/on
-            object = Action(assignee='IOT-Manager', action='Power Off/On', status='Done')
-            db.session.add(object)
-            db.session.commit()
+                object = Action(assignee='IOT-Manager', action='Power Off/On', status='Done')
+                db.session.add(object)
+                db.session.commit()
         else:
             return {'status':'wrong'}
 
         return {'status':'success'}
 
+class Info(Resource):
+    def get(self):
+        response = requests.request("GET", url + '/info/', headers={}, data={})
+        data = response.json()
+        return {"current_temp": data.current_temp, "request_temp": data.request_temp, "current_status": data.current_status}
+
 api.add_resource(Notes, '/notes')
 api.add_resource(Actions, '/actions')
+api.add_resource(Info, '/info')
 
 if __name__ == '__main__':
      app.run()

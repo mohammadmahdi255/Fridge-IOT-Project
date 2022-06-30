@@ -108,7 +108,7 @@
                     <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Current Temprature <i class="mdi mdi-oil-temperature mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">50<span> &#8451;</span></h2>
+                    <h2 class="mb-5" id="current-temp">50<span> &#8451;</span></h2>
                     <h6 class="card-text">Difference:</h6>
                   </div>
                 </div>
@@ -119,7 +119,7 @@
                     <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Requested Temprature <i class="mdi mdi-account mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">35<span> &#8451;</span></h2>
+                    <h2 class="mb-5" id="request-temp">35<span> &#8451;</span></h2>
                   </div>
                 </div>
               </div>
@@ -129,7 +129,7 @@
                     <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Current Status <i class="mdi mdi-diamond mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5">Sleep</h2>
+                    <h2 class="mb-5" id="status">Sleep</h2>
                   </div>
                 </div>
               </div>
@@ -244,6 +244,23 @@
 
     <!-- Front Requests to Back -->
     <script>
+
+      setInterval(function(){ 
+        caches
+          // Run every 10 seconds
+          $.ajax({
+          "url": "http://localhost:5000/info",
+          "method": "GET",
+          "timeout": 0,
+          }).done(function (response) {
+            $("#current-temp").html(response.data.current_temp)
+            $("#request-temp").html(response.data.request_temp)
+            $("#status").html(response.data.current_status)
+          });
+
+      }, 10000);
+
+
       $("#inc-action").click(function(){
         var settings = {
           "url": "http://localhost:5000/actions",
