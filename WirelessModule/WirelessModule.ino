@@ -5,13 +5,6 @@ void setup() {
     Serial.begin(115200);
     Wire.begin(D1, D2);
 
-    // Initialize the output variables as outputs
-    pinMode(output5, OUTPUT);
-    pinMode(output4, OUTPUT);
-    // Set outputs to LOW
-    digitalWrite(output5, LOW);
-    digitalWrite(output4, LOW);
-
     // Connect to Wi-Fi network with SSID and password
     sendData(SLAVE_ADDRESS, "Connecting to ");
     sendData(SLAVE_ADDRESS, String(ssid));
@@ -46,6 +39,12 @@ void loop() {
                 header += c;
 
                 if (c == '\n' && currentLine.length() == 0) {
+                    client.println("HTTP/1.1 200 OK");
+                    client.println("Content-Type: text/html");
+                    client.println("Connection: close");  // the connection will be closed after completion of the response
+                    client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+                    client.println();
+                    
                     if (header.indexOf("GET /1/") >= 0) {
                         sendData(SLAVE_ADDRESS, "2");  // inc temp is 2
                         client.println("'{\"message\": \"successfull\"}'");
@@ -63,14 +62,19 @@ void loop() {
                         client.println("'{\"message\": \"successfull\"}'");
                     } else if (header.indexOf("GET /info/") >= 0) {
                         byte data[12];
-                        char buff[512];
+                        char buff[128] = "";
                         recvData(SLAVE_ADDRESS, &data[0], 12);
                         float currentTemp = *((float *)&data[0]);
                         float requstTemp = *((float *)&data[4]);
-                        int currentState = *((int *)&data[8]);
-                        sprintf(buff, "'{%s:\"%f\",%s:\"%f\",%s:\"%s\"}'", "current_temperature", currentTemp, "request_temp", requstTemp, "current_status", getStatus(currentState));
+                        long currentState = *((long *)&data[8]);
+                        Serial.println(currentState);
+                        String crTemp = currentState != 0 ? String(currentTemp) : "Non";
+                        String rqTemp = currentState != 0 ? String(requstTemp) : "Non";       
+                        sprintf(buff, "'{%s:\"%s\",%s:\"%s\",%s:\"%s\"}'", "\"current_temp\"", crTemp, "\"request_temp\"", rqTemp, "\"current_status\"", getStatus(currentState));
                         Serial.println(buff);
                         client.println(buff);
+                    } else {
+                        client.println("Not Found");
                     }
                     break;
                 } else if(c == '\n') {

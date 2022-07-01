@@ -37,44 +37,43 @@ bool SensorUnit::isDoorClose()
 
 int SensorUnit::readKey()
 {
-      while(true)
-      {
-            int reading = calculateKey();
-            
-            if(reading != lastButtonState)
-                  timer.set(DEBOUNCE_TIMER);
-            
-            if (timer.getDelay(DEBOUNCE_TIMER) > debounceDelay[reading+1]) {
-                  if (reading != buttonState) {
-                        buttonState = reading;
-                        return buttonState;
-                  } else {
-                        return NO_INPUT;
-                  }
+    while(true)
+    {
+        int reading = calculateKey();
+        
+        if(reading != lastButtonState)
+            timer.set(DEBOUNCE_TIMER);
+        
+        if (timer.getDelay(DEBOUNCE_TIMER) > debounceDelay[reading+1]) {
+            if (reading != buttonState) {
+                buttonState = reading;
+                return buttonState;
+            } else {
+                return NO_INPUT;
             }
-            
-            lastButtonState = reading;
-      }
+        }
+        
+        lastButtonState = reading;
+    }
 }
 
 int SensorUnit::calculateKey()
 {
-      float VR_Calculated, RT, voltageMinimum, voltageMaximum, voltage = sourceVoltage * analogRead(pinKey) / 1023;
-    
-      for(unsigned int i=pushbuttonsCount; i > 0; i--)
-      { 
+    float VR_Calculated, RT, voltageMinimum, voltageMaximum, voltage = sourceVoltage * analogRead(pinKey) / 1023;
+
+    for(unsigned int i=pushbuttonsCount; i > 0; i--)
+    {
+        RT = 1/(i * resitorValue) + 1/resitorToGround;
+        RT = 1/RT;
+
+        VR_Calculated =(sourceVoltage * RT) / ((pushbuttonsCount - i + 1) * resitorValue + RT);
+
+        voltageMinimum = (1 - V_tolerance) * VR_Calculated;
+        voltageMaximum = (1 + V_tolerance) * VR_Calculated;
+
+        if(voltageMinimum < voltage && voltage < voltageMaximum)
+        return pushbuttonsCount - i;
+    }
       
-            RT = 1/(i * resitorValue) + 1/resitorToGround;
-            RT = 1/RT;
-            
-            VR_Calculated =(sourceVoltage * RT) / ((pushbuttonsCount - i + 1) * resitorValue + RT);
-            
-            voltageMinimum = (1 - V_tolerance) * VR_Calculated;
-            voltageMaximum = (1 + V_tolerance) * VR_Calculated;
-            
-            if(voltageMinimum < voltage && voltage < voltageMaximum)
-            return pushbuttonsCount - i;
-      }
-      
-      return NO_INPUT;
+    return NO_INPUT;
 }

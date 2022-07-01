@@ -1,2 +1,2 @@
-#define SECRET_SSID "Azuz"
-#define SECRET_PASS "lae@98255"
+#define SECRET_SSID "AndroidAPB806"
+#define SECRET_PASS "aminamin"

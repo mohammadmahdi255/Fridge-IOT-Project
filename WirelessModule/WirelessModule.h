@@ -6,18 +6,11 @@
 
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
+const char* statusName[] = {"Emergency", "Fetal Error", "Off", "Init Up", "Cooling", "Door is Open", "Sleep", "Not Found"};
 
 WiFiServer server(80);
 
 String header;
-
-// Auxiliar variables to store the current output state
-String output5State = "off";
-String output4State = "off";
-
-// Assign output variables to GPIO pins
-const int output5 = 2;
-const int output4 = 16;
 
 // Current time
 unsigned long currentTime = millis();
@@ -42,23 +35,9 @@ void recvData(int address, byte data[], int size) {
     delay(70);
 }
 
-String getStatus(int currentStatus) {
-    switch (currentStatus) {
-        case -2:
-            return "Emergency";
-        case -1:
-            return "Fetal Error";
-        case 0:
-            return "Off";
-        case 1:
-            return "Init Up";
-        case 2:
-            return "Cooling";
-        case 3:
-            return "Door is Open";
-        case 4:
-            return "Sleep";
-        default:
-            return "Not found";
-    }
+const char* getStatus(long currentStatus) {
+    if(currentStatus < -2 || currentStatus > 4)
+        return statusName[7];
+
+    return statusName[currentStatus + 2];
 }

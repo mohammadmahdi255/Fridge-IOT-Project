@@ -20,7 +20,7 @@
 #define ERROR_DISPLAY   1
 #define TEMP_DISPLAY    2
 
-class ControlUnit : public SensorUnit, SettingUnit
+class ControlUnit : public SensorUnit, public SettingUnit
 {
       private:
             int currentState = OFF;
@@ -46,10 +46,12 @@ class ControlUnit : public SensorUnit, SettingUnit
             int deQueue();
             SegmentDisplay sev[2];
       public:
+            int readWebKey = -1;
             ControlUnit();
             ControlUnit(int pinCompressor, int pinLamp, int pinFan, int pinIonizer, int pinBuzzer, bool isNormallyOpen, int pinKey, int pinLm35, int pinDoor, const int pinSev[], int pinSev0, int pinSev1);
             int getState();
             void process();
             void displayTemp(float temp);
+            String getStatus(int currentStatus);
 };
 #endif

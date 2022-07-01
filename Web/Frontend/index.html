@@ -253,9 +253,11 @@
           "method": "GET",
           "timeout": 0,
           }).done(function (response) {
-            $("#current-temp").html(response.data.current_temp)
-            $("#request-temp").html(response.data.request_temp)
-            $("#status").html(response.data.current_status)
+            // {"current_temp": "2.234500", "request_temp": "32.345501", "current_status": "Emergency"}
+            console.log(response)
+            $("#current-temp").html(response.current_temp)
+            $("#request-temp").html(response.request_temp)
+            $("#status").html(response.current_status)
           });
 
       }, 10000);

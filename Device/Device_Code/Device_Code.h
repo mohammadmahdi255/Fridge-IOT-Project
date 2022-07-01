@@ -1,7 +1,10 @@
 #ifndef DEVICE_CODE_H
 #define DEVICE_CODE_H
 
+#include <Wire.h>
 #include "Control.h"
+
+#define SLAVE_ADDRESS 8
 
 /* 
  *  Sensors and Input interfaces Pins
@@ -25,8 +28,4 @@
 #define PIN_SEV0  44
 #define PIN_SEV1  45
 const int sev[] = {26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41};
-   
-ControlUnit centerUnit(PIN_COMPRESSOR, PIN_LAMP, PIN_FAN, PIN_IONIZER, PIN_BUZZER, true, KEY_READ, PIN_LM35, PIN_DOOR, sev, PIN_SEV0, PIN_SEV1);
-
-
 #endif
