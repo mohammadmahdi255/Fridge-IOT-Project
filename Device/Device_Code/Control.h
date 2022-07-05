@@ -18,8 +18,8 @@
 
 #define UPDATE_TEMP     0
 #define ERROR_DISPLAY   1
-#define OFF_SEVSEG      2
-#define TEMP_DISPLAY    3
+#define TEMP_DISPLAY    2
+#define OFF_SEVSEG      3
 
 class ControlUnit : public SensorUnit, SettingUnit
 {
@@ -31,12 +31,12 @@ class ControlUnit : public SensorUnit, SettingUnit
             Relay ionizer;
             Relay buzzer;
 
-            bool state[4] = {false, false, false, true};
+            bool state[3] = {false, false};
 
             float lastStateTemp = 0.0f;
 
-            int showState = OFF_SEVSEG;
-            bool show = true;
+            int globalState = OFF_SEVSEG;
+            int localState = TEMP_DISPLAY;
 
             bool shouldRest = false;
             bool sound = false;

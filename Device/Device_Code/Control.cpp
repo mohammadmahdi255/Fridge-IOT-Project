@@ -19,7 +19,6 @@ void ControlUnit::updateSystem(int nextState)
     if(nextState < EMERGENCY || nextState > SUSPEND)
         return;
 
-    Serial.println(nextState);
     currentState = nextState;
 
     if(nextState == INIT) {
@@ -128,36 +127,38 @@ void ControlUnit::process()
 
     updateSystem(nextState(reading));
 
-    if(timer.getDelay(SEV_SEG_TIMER) < segTime[showState] || currentState == OFF) {
+    if(timer.getDelay(SEV_SEG_TIMER) < segTime[globalState] && (!state[UPDATE_TEMP] || localState == UPDATE_TEMP) || currentState == OFF) {
         return;
     }
 
-    state[showState] = false;
+    Serial.println(globalState);
 
-    switch (showState) 
+    switch (globalState) 
     {
-        case OFF_SEVSEG:
-            showState = TEMP_DISPLAY;
+        case UPDATE_TEMP:
+            globalState = OFF_SEVSEG;
+            localState = state[UPDATE_TEMP] ? UPDATE_TEMP : state[ERROR_DISPLAY] ? ERROR_DISPLAY : TEMP_DISPLAY;
+            break;
+
+        case ERROR_DISPLAY:
+            state[globalState] = false;
+            globalState = OFF_SEVSEG;
+            localState = state[UPDATE_TEMP] ? UPDATE_TEMP : TEMP_DISPLAY;
             break;
 
         case TEMP_DISPLAY:
-            showState = !(state[UPDATE_TEMP] || state[ERROR_DISPLAY]) ? OFF_SEVSEG : TEMP_DISPLAY;
-            state[showState] = true;
+            globalState = (state[UPDATE_TEMP] || state[ERROR_DISPLAY]) ? OFF_SEVSEG : TEMP_DISPLAY;
+            localState = state[UPDATE_TEMP] ? UPDATE_TEMP : state[ERROR_DISPLAY] ? ERROR_DISPLAY : TEMP_DISPLAY;
             break;
-
-        default:
-            state[OFF_SEVSEG] = true;
-            showState = OFF_SEVSEG;
-            state[TEMP_DISPLAY] = true;
+        
+        case OFF_SEVSEG:
+            globalState = localState;
             break;
     }
     
-    while (!state[showState]) {
-        showState = (showState + 1) % 4;
-    }
     timer.set(SEV_SEG_TIMER);
 
-    if(showState == OFF_SEVSEG) {
+    if(globalState == OFF_SEVSEG) {
         sev[1].turnOff();
         sev[0].turnOff();
         return;
@@ -166,14 +167,14 @@ void ControlUnit::process()
     sev[1].turnOn();
     sev[0].turnOn(); 
 
-    if(showState == TEMP_DISPLAY) {
+    if(globalState == TEMP_DISPLAY) {
         displayTemp(getCurrentTemperature());
         return;
     }
 
-    if(showState == UPDATE_TEMP) {
+    if(globalState == UPDATE_TEMP) {
         displayTemp(getTemperature());
-        state[UPDATE_TEMP] = false;
+        state[globalState] = false;
         return;
     } 
     
@@ -189,7 +190,6 @@ void ControlUnit::process()
             sev[0].displayHex(14, false); 
             break;
     }
-    state[ERROR_DISPLAY] = false;
       
 }
 
