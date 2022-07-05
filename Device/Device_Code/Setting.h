@@ -6,7 +6,7 @@
 #define WORKTIME 10000 // 30 min
 #define RESTTIME 10000 // 10 min
 #define OPENDOOR 10000 // 30 sec
-const unsigned int segTime[] =  {2000, 300};
+const unsigned int segTime[] =  {2000, 2000, 1000, 2000};
 
 class SettingUnit
 {
