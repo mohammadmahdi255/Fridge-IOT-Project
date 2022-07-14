@@ -132,7 +132,7 @@ void ControlUnit::process()
 
     updateSystem(nextState(reading));
 
-    if(timer.getDelay(SEV_SEG_TIMER) > segTime[int(show)] && show) {
+    if(timer.getDelay(SEV_SEG_TIMER) > segTime[int(show)]) {
         do {
             showState = (showState + 1) % 3;
         } while (!state[showState]);
@@ -140,8 +140,6 @@ void ControlUnit::process()
     }
 
     if(show && currentState != OFF) {
-        sev[1].turnOn();
-        sev[0].turnOn(); 
         if(showState == UPDATE_TEMP) {
             displayTemp(getTemperature());
             state[UPDATE_TEMP] = false;

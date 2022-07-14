@@ -15,7 +15,7 @@ api = Api(app)
 db = SQLAlchemy(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-url = "http://192.168.43.29"
+url = "http://192.168.137.111"
 
 def convertToJson(content):
     fixed_string = str(content)[4:-7]

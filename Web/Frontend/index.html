@@ -108,8 +108,7 @@
                     <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Current Temprature <i class="mdi mdi-oil-temperature mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5" id="current-temp">50<span> &#8451;</span></h2>
-                    <h6 class="card-text">Difference:</h6>
+                    <h2 class="mb-5" id="current-temp">NaN<span> &#8451;</span></h2>
                   </div>
                 </div>
               </div>
@@ -119,7 +118,7 @@
                     <img src="assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image" />
                     <h4 class="font-weight-normal mb-3">Requested Temprature <i class="mdi mdi-account mdi-24px float-right"></i>
                     </h4>
-                    <h2 class="mb-5" id="request-temp">35<span> &#8451;</span></h2>
+                    <h2 class="mb-5" id="request-temp">NaN<span> &#8451;</span></h2>
                   </div>
                 </div>
               </div>
@@ -247,7 +246,7 @@
 
       setInterval(function(){ 
         caches
-          // Run every 10 seconds
+          // Run every 7 seconds
           $.ajax({
           "url": "http://localhost:5000/info",
           "method": "GET",
@@ -255,12 +254,12 @@
           }).done(function (response) {
             // {"current_temp": "2.234500", "request_temp": "32.345501", "current_status": "Emergency"}
             console.log(response)
-            $("#current-temp").html(response.current_temp)
-            $("#request-temp").html(response.request_temp)
+            $("#current-temp").html(response.current_temp + "<span> &#8451;</span>")
+            $("#request-temp").html(response.request_temp + "<span> &#8451;</span>")
             $("#status").html(response.current_status)
           });
 
-      }, 10000);
+      }, 7000);
 
 
       $("#inc-action").click(function(){
